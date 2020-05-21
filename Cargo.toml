@@ -1,0 +1,13 @@
+[package]
+name = "techshare_deno_plugin"
+version = "0.0.1"
+authors = ["Shaun Xu"]
+edition = "2018"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+deno_core = "0.45.0"
+futures = "0.3.5"
