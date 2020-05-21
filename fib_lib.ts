@@ -3,16 +3,23 @@
 export class Fib {
 
     private _opIdFibAsync: number;
+    private _opIdFibSync: number;
 
     constructor() {
         Deno.openPlugin(`./target/debug/libtechshare_deno_plugin.dylib`);
-        const { fibAsync } = Deno.core.ops();
+        const { fibAsync, fibSync } = Deno.core.ops();
         if (fibAsync > 0) {
             this._opIdFibAsync = fibAsync;
             Deno.core.setAsyncHandler(this._opIdFibAsync, this.asyncHandler);
         }
         else {
             throw new Error(`Failed to load op "fibAsync" from the plugin`);
+        }
+        if (fibSync > 0) {
+            this._opIdFibSync = fibSync;
+        }
+        else {
+            throw new Error(`Failed to load op "fibSync" from the plugin`);
         }
     }
 
@@ -62,5 +69,17 @@ export class Fib {
                 return reject("Expected null response directly from async call");
             }
         });
+    }
+
+    public calculateSync(num: number): number {
+        const u8array = Fib.convertNumberToUint8Array(num);
+        const response = Deno.core.dispatch(this._opIdFibSync, u8array) as Uint8Array;
+        if (response) {
+            const result = Fib.convertUint8ArrayToNumber(response);
+            return result;
+        }
+        else {
+            throw new Error("Empty response");
+        }
     }
 }
